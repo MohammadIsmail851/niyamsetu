@@ -28,6 +28,8 @@ import AdminDashboard            from '@/pages/admin/AdminDashboard';
 
 // Shared
 import SearchPage                from '@/pages/SearchPage';
+import ProfilePage               from '@/pages/ProfilePage';
+import SettingsPage              from '@/pages/SettingsPage';
 import { ProtectedRoute, PublicOnlyRoute } from '@/routes/guards';
 
 function App() {
@@ -88,6 +90,10 @@ function App() {
         <Route path="/admin/analytics"             element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/settings"              element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/search"                element={<ProtectedRoute allowedRoles={['admin']}><SearchPage /></ProtectedRoute>} />
+
+        {/* ── Shared Authenticated ──────────────────────────────── */}
+        <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
         {/* ── Fallback ─────────────────────────────────────────── */}
         <Route path="*" element={<Navigate to="/" replace />} />

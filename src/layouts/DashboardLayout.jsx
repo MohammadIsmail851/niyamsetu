@@ -18,27 +18,27 @@ const roleNavItems = {
     { to: '/owner/instruments',  icon: Package,         labelKey: 'instruments' },
     { to: '/owner/applications', icon: FileText,        labelKey: 'applications' },
     { to: '/owner/certificates', icon: Award,           labelKey: 'certificates' },
-    { to: '/owner/profile',      icon: User,            labelKey: 'profile' },
+    { to: '/profile',            icon: User,            labelKey: 'profile' },
   ],
   lmo: [
     { to: '/lmo/dashboard',      icon: LayoutDashboard, labelKey: 'dashboard' },
     { to: '/lmo/applications',   icon: FileText,        labelKey: 'applications' },
     { to: '/lmo/inspections',    icon: Package,         labelKey: 'instruments' },
     { to: '/lmo/certificates',   icon: Award,           labelKey: 'certificates' },
-    { to: '/lmo/profile',        icon: User,            labelKey: 'profile' },
+    { to: '/profile',            icon: User,            labelKey: 'profile' },
   ],
   gatc: [
     { to: '/gatc/dashboard',     icon: LayoutDashboard, labelKey: 'dashboard' },
     { to: '/gatc/tests',         icon: Package,         labelKey: 'instruments' },
     { to: '/gatc/reports',       icon: FileText,        labelKey: 'applications' },
-    { to: '/gatc/profile',       icon: User,            labelKey: 'profile' },
+    { to: '/profile',            icon: User,            labelKey: 'profile' },
   ],
   admin: [
     { to: '/admin/dashboard',    icon: LayoutDashboard, labelKey: 'dashboard' },
     { to: '/admin/applications', icon: FileText,        labelKey: 'applications' },
     { to: '/admin/officers',     icon: User,            labelKey: 'profile' },
     { to: '/admin/analytics',    icon: Award,           labelKey: 'certificates' },
-    { to: '/admin/settings',     icon: Settings,        labelKey: 'settings' },
+    { to: '/settings',           icon: Settings,        labelKey: 'settings' },
   ],
 };
 

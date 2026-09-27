@@ -232,9 +232,9 @@ const LoginPage = () => {
               <button
                 type="button"
                 onClick={() => setDigiOpen(true)}
-                className="h-[46px] rounded-xl bg-orange-500/10 dark:bg-orange-500/15 hover:bg-orange-500/20 dark:hover:bg-orange-500/25 border border-orange-400/30 dark:border-orange-400/40 text-orange-700 dark:text-orange-200 text-xs font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer shadow-sm"
+                className="h-[46px] rounded-xl bg-[#1565C0]/10 dark:bg-[#1565C0]/20 hover:bg-[#1565C0]/20 dark:hover:bg-[#1565C0]/30 border border-[#1565C0]/30 dark:border-[#1565C0]/50 text-[#1565C0] dark:text-blue-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] cursor-pointer shadow-sm"
               >
-                <Shield size={15} className="text-orange-500 dark:text-orange-400" />
+                <Shield size={15} className="text-[#1565C0] dark:text-blue-400" />
                 DigiLocker
               </button>
             </div>
