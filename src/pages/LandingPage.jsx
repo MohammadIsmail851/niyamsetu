@@ -1,201 +1,328 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Shield, Cpu, QrCode, Globe, ArrowRight, CheckCircle,
-  Package, FileText, Award, BarChart2, Phone, Scale,
+  Shield, QrCode, ArrowRight, Package, ClipboardCheck, Clock,
+  Scale, Building2, ShieldCheck, FlaskConical, BarChart3
 } from 'lucide-react';
+import FloatingBlobs from '@/components/FloatingBlobs';
+import ThemeToggle from '@/components/ThemeToggle';
 
-const features = [
-  { icon: Package,    title: 'Instrument Registry',         desc: 'Register all weighing & measuring instruments with AI-assisted OCR data extraction.' },
-  { icon: FileText,   title: 'Online Verification',         desc: 'Apply for verification online. Track every stage from submission to certificate.' },
-  { icon: Shield,     title: 'Legal Compliance',            desc: 'Built for Legal Metrology Act, 2009 & Rules, 2011. Every workflow follows official procedures.' },
-  { icon: QrCode,     title: 'QR Digital Certificates',     desc: 'Tamper-proof digital certificates with embedded QR codes for instant public verification.' },
-  { icon: Cpu,        title: 'AI OCR Integration',          desc: 'Upload instrument photos — AI extracts manufacturer, model, serial & capacity automatically.' },
-  { icon: Globe,      title: 'Multilingual (BHASHINI)',     desc: 'Full Telugu & English support. Switch languages instantly across the entire platform.' },
-  { icon: BarChart2,  title: 'Analytics Dashboard',         desc: 'District-wise pendency, officer workload, and monthly trends for administrators.' },
-  { icon: Phone,      title: 'Mobile Field Verification',   desc: 'Touch-optimized officer workflow with camera upload, GPS, and offline-ready forms.' },
+// 4 Core System Capabilities (replacing the old cards)
+const systemCapabilities = [
+  {
+    title: 'Instrument Registration',
+    desc: 'Register and manage weighing & measuring instruments with AI-assisted OCR nameplate detection.',
+    icon: Scale,
+  },
+  {
+    title: 'Verification Workflow',
+    desc: 'Apply, schedule, inspect and track verification digitally with transparent audit trails.',
+    icon: ClipboardCheck,
+  },
+  {
+    title: 'QR Digital Certificate',
+    desc: 'Generate and verify tamper-proof certificates instantly with embedded cryptographic signatures.',
+    icon: QrCode,
+  },
+  {
+    title: 'Validity & Renewal',
+    desc: 'Automatic expiry tracking and renewal reminders under the Legal Metrology Act, 2009.',
+    icon: Clock,
+  },
 ];
 
+// 4 Stakeholder Roles in 2x2 Glass Grid
 const roles = [
-  { role: 'Business Owner',        desc: 'Register instruments, apply for verification, download certificates', color: 'bg-blue-50 border-blue-200',   icon: '🏭', to: '/login' },
-  { role: 'LM Officer',            desc: 'Schedule inspections, enter field observations, issue certificates',   color: 'bg-purple-50 border-purple-200', icon: '👮', to: '/login' },
-  { role: 'GATC Laboratory',       desc: 'Receive assigned tests, record measurements, upload reports',           color: 'bg-amber-50 border-amber-200',  icon: '🔬', to: '/login' },
-  { role: 'State Administrator',   desc: 'Monitor district pendency, manage officers, view analytics',           color: 'bg-green-50 border-green-200',  icon: '🏛️', to: '/login' },
+  {
+    role: 'Business Owner',
+    desc: 'Register & Track Instruments',
+    sub: 'Submit verification applications, manage instruments, and access digital certificates instantly.',
+    icon: Building2,
+    to: '/login',
+  },
+  {
+    role: 'Legal Metrology Officer',
+    desc: 'Inspect & Verify Instruments',
+    sub: 'Schedule on-site inspections, record tolerance observations, and issue verified certificates.',
+    icon: ShieldCheck,
+    to: '/login',
+  },
+  {
+    role: 'GATC Laboratory',
+    desc: 'Technical Testing & Reports',
+    sub: 'Receive assigned precision instruments, execute lab calibration, and upload statutory test records.',
+    icon: FlaskConical,
+    to: '/login',
+  },
+  {
+    role: 'State Administrator',
+    desc: 'Analytics & Officer Management',
+    sub: 'Real-time state overview, district workload management, and compliance enforcement.',
+    icon: BarChart3,
+    to: '/login',
+  },
 ];
 
-const LandingPage = () => (
-  <div className="min-h-screen bg-white">
-    {/* Navbar */}
-    <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-navy flex items-center justify-center">
-            <span className="text-white font-bold text-sm">NS</span>
-          </div>
-          <div>
-            <div className="font-bold text-navy text-base leading-tight">NIYAMSETU</div>
-            <div className="text-[10px] text-slate leading-tight hidden sm:block">Legal Metrology Verification</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/verify/NS-CERT-2026-001045" className="text-sm text-slate hover:text-navy hidden sm:block">Verify Certificate</Link>
-          <Link to="/login" className="btn btn-outline btn-sm">Login</Link>
-          <Link to="/register" className="btn btn-primary btn-sm">Register</Link>
-        </div>
-      </div>
-    </nav>
+const LandingPage = () => {
+  return (
+    <div className="min-h-screen theme-bg text-slate-900 dark:text-slate-100 relative overflow-x-hidden transition-colors duration-300">
+      {/* Floating Ambient Light Blobs */}
+      <FloatingBlobs />
 
-    {/* Hero */}
-    <section className="bg-gradient-to-br from-navy via-navy-800 to-royal text-white py-20 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full text-sm mb-6">
-            <Scale size={14} />
-            <span>Smart India Hackathon 2026 — PS 26036</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
-            NIYAMSETU
-          </h1>
-          <p className="text-xl md:text-2xl text-white/80 font-light mb-2">
-            Unified Digital Verification Platform
-          </p>
-          <p className="text-white/60 text-sm mb-8 max-w-xl mx-auto">
-            The complete online verification ecosystem for weighing and measuring instruments 
-            under the Legal Metrology Act, 2009 & Rules, 2011
-          </p>
-
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link to="/register" className="btn btn-lg bg-white text-navy hover:bg-gray-100 shadow-xl">
-              Get Started <ArrowRight size={16} />
-            </Link>
-            <Link to="/verify/NS-CERT-2026-001045" className="btn btn-lg border-2 border-white/30 text-white hover:bg-white/10">
-              <QrCode size={16} /> Demo Certificate
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16"
-        >
-          {[
-            { value: '10,000+', label: 'Instruments Registered' },
-            { value: '248',     label: 'Applications This Year' },
-            { value: '189',     label: 'Active Certificates' },
-            { value: '28',      label: 'Districts Covered' },
-          ].map(s => (
-            <div key={s.label} className="bg-white/10 border border-white/20 rounded-2xl py-5 px-4">
-              <div className="text-2xl font-bold">{s.value}</div>
-              <div className="text-white/60 text-xs mt-0.5">{s.label}</div>
+      {/* Navbar with Global Theme Toggle in top-right */}
+      <nav className="sticky top-0 z-40 bg-white/70 dark:bg-[#04142F]/75 backdrop-blur-xl border-b border-blue-200/50 dark:border-white/10 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+          {/* Brand Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600/10 dark:bg-blue-600/25 border border-blue-500/25 dark:border-blue-400/40 flex items-center justify-center shadow-sm">
+              <Shield size={22} className="text-blue-600 dark:text-blue-400" />
             </div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-
-    {/* Portal Access */}
-    <section className="py-16 px-4 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl font-bold text-gray-900">Four Dedicated Portals</h2>
-          <p className="text-slate mt-2">Each stakeholder gets their own tailored experience</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {roles.map(r => (
-            <Link key={r.role} to={r.to} className={`block p-5 rounded-2xl border-2 transition-all hover:shadow-md hover:-translate-y-0.5 ${r.color}`}>
-              <div className="text-3xl mb-3">{r.icon}</div>
-              <div className="font-bold text-gray-900 mb-1">{r.role}</div>
-              <div className="text-xs text-slate">{r.desc}</div>
-              <div className="flex items-center gap-1 text-xs font-semibold text-royal mt-3">
-                Access Portal <ArrowRight size={11} />
+            <div>
+              <div className="font-extrabold text-base tracking-wide leading-tight text-slate-900 dark:text-white">
+                NIYAMSETU
               </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
+              <div className="text-[10px] text-slate-500 dark:text-blue-200/60 leading-tight hidden sm:block uppercase tracking-wider font-medium">
+                Legal Metrology Verification Platform
+              </div>
+            </div>
+          </div>
 
-    {/* Features */}
-    <section className="py-16 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl font-bold text-gray-900">Platform Features</h2>
-          <p className="text-slate mt-2">Everything needed for end-to-end digital verification</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {features.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className="p-5 rounded-2xl border border-gray-200 hover:border-royal hover:shadow-sm transition-all"
+          {/* Navigation & Controls */}
+          <div className="flex items-center gap-3">
+            <Link
+              to="/verify/NS-CERT-2026-001045"
+              className="text-xs font-medium text-slate-600 dark:text-white/70 hover:text-blue-600 dark:hover:text-white px-3 py-1.5 rounded-lg hover:bg-blue-50/50 dark:hover:bg-white/5 transition-colors hidden sm:block"
             >
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
-                <f.icon size={18} className="text-royal" />
-              </div>
-              <div className="font-semibold text-gray-900 mb-1">{f.title}</div>
-              <div className="text-xs text-slate">{f.desc}</div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
+              Verify Certificate
+            </Link>
+            <Link
+              to="/login"
+              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 dark:text-white/90 bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 border border-blue-200/60 dark:border-white/15 backdrop-blur-md shadow-sm transition-all hover:scale-[1.02]"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/register"
+              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-[0_0_18px_rgba(37,99,235,0.35)] dark:shadow-[0_0_24px_rgba(37,99,235,0.7)] transition-all hover:scale-[1.02]"
+            >
+              Register
+            </Link>
 
-    {/* Workflow */}
-    <section className="py-16 px-4 bg-navy text-white">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-2xl font-bold mb-10">Verification Lifecycle</h2>
-        <div className="flex items-center justify-center gap-2 flex-wrap">
-          {['Registration', 'Instrument Registration', 'Application', 'Admin Assignment', 'LMO / GATC', 'Inspection', 'Pass/Fail', 'QR Certificate', 'Validity Tracking', 'Renewal'].map((step, i, arr) => (
-            <div key={step} className="flex items-center gap-2">
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-royal flex items-center justify-center text-xs font-bold">{i+1}</div>
-                <div className="text-xs text-white/70 mt-1 text-center max-w-[70px]">{step}</div>
-              </div>
-              {i < arr.length - 1 && <ArrowRight size={14} className="text-white/30 flex-shrink-0 mb-4" />}
+            {/* Global Theme Toggle */}
+            <ThemeToggle className="ml-1" />
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 pt-16 sm:pt-24 pb-14 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            {/* Government Authority Badge */}
+            <div className="inline-flex items-center gap-2 bg-blue-500/10 dark:bg-white/10 border border-blue-500/20 dark:border-white/20 px-4 py-1.5 rounded-full text-xs sm:text-sm mb-6 shadow-sm backdrop-blur-md">
+              <Scale size={15} className="text-blue-600 dark:text-blue-400" />
+              <span className="font-medium text-slate-800 dark:text-white/90">
+                Government of India · Legal Metrology Act, 2009
+              </span>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
 
-    {/* CTA */}
-    <section className="py-16 px-4 bg-gray-50">
-      <div className="max-w-xl mx-auto text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">Ready to Start?</h2>
-        <p className="text-slate mb-6">Join NIYAMSETU for transparent, efficient legal metrology verification</p>
-        <div className="flex gap-3 justify-center">
-          <Link to="/register" className="btn btn-primary btn-lg">Register Business</Link>
-          <Link to="/login"    className="btn btn-outline btn-lg">Sign In</Link>
-        </div>
-      </div>
-    </section>
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-slate-950 dark:text-white">
+              NIYAMSETU
+            </h1>
+            <p className="text-xl sm:text-2xl text-blue-600 dark:text-blue-300/90 font-light mb-4">
+              Unified Digital Verification Platform
+            </p>
+            <p className="text-slate-600 dark:text-slate-300/80 text-sm sm:text-base mb-8 max-w-2xl mx-auto leading-relaxed">
+              The national digital infrastructure for weighing and measuring instruments. 
+              Facilitating transparent verification, inspection scheduling, tamper-proof QR certification, 
+              and automated statutory validity tracking.
+            </p>
 
-    {/* Footer */}
-    <footer className="bg-navy text-white py-8 px-4 text-center">
-      <div className="flex items-center justify-center gap-3 mb-3">
-        <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-          <span className="font-bold text-xs">NS</span>
+            {/* CTA Buttons */}
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <Link
+                to="/register"
+                className="h-[52px] px-8 rounded-xl font-semibold text-white flex items-center gap-2 bg-blue-600 hover:bg-blue-500 shadow-[0_4px_20px_rgba(37,99,235,0.35)] dark:shadow-[0_0_28px_rgba(37,99,235,0.65)] hover:scale-[1.02] active:scale-[0.99] transition-all cursor-pointer"
+              >
+                <span>Get Started</span>
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                to="/verify/NS-CERT-2026-001045"
+                className="h-[52px] px-6 rounded-xl font-semibold text-slate-800 dark:text-white/90 flex items-center gap-2 bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-blue-200/70 dark:border-white/20 backdrop-blur-md shadow-sm hover:scale-[1.02] active:scale-[0.99] transition-all"
+              >
+                <QrCode size={16} className="text-blue-600 dark:text-blue-400" />
+                <span>Verify Demo Certificate</span>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Actual System Capabilities Grid (Replacing old feature cards) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16 text-left">
+            {systemCapabilities.map((item) => (
+              <div
+                key={item.title}
+                className="glass-card glass-card-hover p-6 rounded-[24px] flex flex-col justify-between transition-all duration-300"
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/15 dark:bg-blue-500/25 border border-blue-500/20 dark:border-blue-400/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4 shadow-sm">
+                    <item.icon size={22} />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300/80 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <span className="font-bold">NIYAMSETU</span>
-      </div>
-      <p className="text-white/50 text-xs">
-        Ministry of Consumer Affairs, Food and Public Distribution · Government of India
-      </p>
-      <p className="text-white/30 text-[10px] mt-2">
-        Smart India Hackathon 2026 · PS 26036 · Legal Metrology Act, 2009
-      </p>
-    </footer>
-  </div>
-);
+      </section>
+
+      {/* Role-Based Access (2x2 Glass Grid) */}
+      <section className="py-16 px-4 sm:px-6 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">
+              Role-Based Access
+            </h2>
+            <p className="text-slate-600 dark:text-slate-300 text-sm mt-2 max-w-md mx-auto">
+              Secure workspaces for every Legal Metrology stakeholder.
+            </p>
+          </div>
+
+          {/* Responsive 2x2 Grid with Equal Card Heights */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {roles.map((r) => (
+              <Link
+                key={r.role}
+                to={r.to}
+                className="glass-card glass-card-hover p-7 rounded-[24px] h-full flex flex-col justify-between transition-all duration-300 group"
+              >
+                <div>
+                  <div className="flex items-center gap-3.5 mb-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/15 dark:bg-blue-500/25 border border-blue-500/20 dark:border-blue-400/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm group-hover:scale-105 transition-transform">
+                      <r.icon size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-slate-900 dark:text-white text-lg leading-snug">
+                        {r.role}
+                      </h3>
+                      <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                        {r.desc}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300/80 leading-relaxed pl-0.5">
+                    {r.sub}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 mt-5 group-hover:translate-x-1 transition-transform">
+                  <span>Access Portal</span>
+                  <ArrowRight size={13} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Verification Lifecycle Section */}
+      <section className="py-16 px-4 sm:px-6 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="glass-card p-8 sm:p-12 text-center rounded-[24px]">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-2">
+              Official Verification Lifecycle
+            </h2>
+            <p className="text-slate-600 dark:text-slate-300/80 text-xs sm:text-sm mb-10 max-w-xl mx-auto">
+              Statutory verification procedure governed by the Legal Metrology (General) Rules, 2011
+            </p>
+
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {[
+                'Business Register',
+                'Instrument Entry',
+                'Application Submission',
+                'Officer Assignment',
+                'Technical Verification',
+                'Inspection Pass',
+                'QR Certificate Issue',
+                'Validity & Renewal',
+              ].map((step, i, arr) => (
+                <div key={step} className="flex items-center gap-2">
+                  <div className="flex flex-col items-center">
+                    <div className="w-9 h-9 rounded-full bg-blue-600/15 dark:bg-blue-600/35 border border-blue-500/30 dark:border-blue-400/50 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-300 shadow-sm">
+                      {i + 1}
+                    </div>
+                    <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 mt-1.5 text-center max-w-[85px] leading-tight">
+                      {step}
+                    </div>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <ArrowRight size={14} className="text-slate-400 dark:text-white/30 flex-shrink-0 mb-5 hidden sm:block" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Ready to Verify CTA */}
+      <section className="py-14 px-4 sm:px-6 relative z-10">
+        <div className="max-w-xl mx-auto text-center">
+          <div className="glass-card p-8 sm:p-10 rounded-[24px]">
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
+              Ready to Verify?
+            </h2>
+            <p className="text-slate-600 dark:text-slate-300/80 text-xs sm:text-sm mb-6">
+              Access the official legal metrology verification network or register your business instruments today.
+            </p>
+            <div className="flex gap-3 justify-center flex-wrap">
+              <Link
+                to="/register"
+                className="h-[52px] px-8 rounded-xl font-semibold text-white flex items-center gap-2 bg-blue-600 hover:bg-blue-500 shadow-[0_4px_20px_rgba(37,99,235,0.35)] dark:shadow-[0_0_24px_rgba(37,99,235,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all cursor-pointer"
+              >
+                Register Business
+              </Link>
+              <Link
+                to="/login"
+                className="h-[52px] px-6 rounded-xl font-semibold text-slate-800 dark:text-white/90 flex items-center gap-2 bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 border border-blue-200/70 dark:border-white/20 backdrop-blur-md shadow-sm hover:scale-[1.02] active:scale-[0.99] transition-all"
+              >
+                Sign In
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 py-10 px-4 border-t border-blue-200/50 dark:border-white/10 text-center transition-colors duration-300">
+        <div className="flex items-center justify-center gap-2.5 mb-2">
+          <div className="w-8 h-8 rounded-xl bg-blue-600/10 dark:bg-white/10 border border-blue-500/20 dark:border-white/20 flex items-center justify-center">
+            <Shield size={16} className="text-blue-600 dark:text-blue-400" />
+          </div>
+          <span className="font-extrabold text-slate-900 dark:text-white text-base tracking-wide">
+            NIYAMSETU
+          </span>
+        </div>
+        <p className="text-slate-600 dark:text-white/60 text-xs">
+          Ministry of Consumer Affairs, Food and Public Distribution · Government of India
+        </p>
+        <p className="text-slate-400 dark:text-white/40 text-[11px] mt-1.5">
+          Standards of Weights and Measures · Legal Metrology Act, 2009 & Legal Metrology (General) Rules, 2011
+        </p>
+      </footer>
+    </div>
+  );
+};
 
 export default LandingPage;

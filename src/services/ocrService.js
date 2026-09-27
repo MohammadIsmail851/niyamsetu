@@ -11,15 +11,16 @@ const MOCK_INSTRUMENTS = [
 
 export const performOCRExtraction = async (imageFile) => {
   // Simulate network latency
-  await new Promise((resolve) => setTimeout(resolve, 2200));
+  await new Promise((resolve) => setTimeout(resolve, 1500));
 
   // Return random mock data
   const mock = MOCK_INSTRUMENTS[Math.floor(Math.random() * MOCK_INSTRUMENTS.length)];
 
   return {
     success: true,
-    confidence: Math.round(82 + Math.random() * 16),
+    confidence: Math.round(88 + Math.random() * 10),
     extracted: mock,
+    ...mock,
     // Fields ready for AIKosh API response shape
     rawResponse: {
       source: 'mock_ocr',
@@ -28,3 +29,5 @@ export const performOCRExtraction = async (imageFile) => {
     },
   };
 };
+
+export const runOCR = performOCRExtraction;

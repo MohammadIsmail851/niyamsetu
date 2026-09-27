@@ -44,7 +44,7 @@ function App() {
         }}
       />
 
-      <Routes>
+    <Routes>
         {/* ── Public ───────────────────────────────────────────── */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/verify/:certificateId" element={<CertificateVerifyPage />} />
