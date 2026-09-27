@@ -1,0 +1,103 @@
+const en = {
+  // Nav / Common
+  appName: 'NIYAMSETU',
+  tagline: 'Unified Digital Verification Platform for Legal Metrology',
+  dashboard: 'Dashboard',
+  instruments: 'Instruments',
+  applications: 'Applications',
+  certificates: 'Certificates',
+  notifications: 'Notifications',
+  profile: 'Profile',
+  settings: 'Settings',
+  logout: 'Logout',
+  search: 'Search',
+  loading: 'Loading...',
+  save: 'Save',
+  submit: 'Submit',
+  cancel: 'Cancel',
+  edit: 'Edit',
+  delete: 'Delete',
+  view: 'View',
+  download: 'Download',
+  back: 'Back',
+  next: 'Next',
+  approve: 'Approve',
+  reject: 'Reject',
+  saveDraft: 'Save Draft',
+
+  // Auth
+  login: 'Login',
+  register: 'Register',
+  email: 'Email Address',
+  password: 'Password',
+  confirmPassword: 'Confirm Password',
+  forgotPassword: 'Forgot Password?',
+  loginWithGoogle: 'Continue with Google',
+  loginWithDigiLocker: 'Login with DigiLocker',
+  dontHaveAccount: "Don't have an account?",
+  alreadyHaveAccount: 'Already have an account?',
+
+  // Dashboard
+  totalApplications: 'Total Applications',
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  activeCertificates: 'Active Certificates',
+  expiringThisMonth: 'Expiring This Month',
+  assignedToday: 'Assigned Today',
+  pendingInspections: 'Pending Inspections',
+  completed: 'Completed',
+  certificatesIssued: 'Certificates Issued',
+
+  // Instruments
+  registerInstrument: 'Register Instrument',
+  instrumentType: 'Instrument Type',
+  category: 'Category',
+  manufacturer: 'Manufacturer',
+  modelNumber: 'Model Number',
+  serialNumber: 'Serial Number',
+  capacity: 'Capacity',
+  accuracy: 'Accuracy / Division',
+  yearOfManufacture: 'Year of Manufacture',
+  purchaseDate: 'Purchase Date',
+
+  // Application
+  newApplication: 'New Application',
+  verificationApplication: 'Verification Application',
+  verificationType: 'Verification Type',
+  preferredDate: 'Preferred Inspection Date',
+  applicationId: 'Application ID',
+  status: 'Status',
+  submittedOn: 'Submitted On',
+  remarks: 'Remarks',
+
+  // Certificate
+  digitalCertificate: 'Digital Certificate',
+  certificateNumber: 'Certificate Number',
+  verificationDate: 'Verification Date',
+  validUntil: 'Valid Until',
+  officerName: 'Officer Name',
+  downloadCertificate: 'Download Certificate',
+
+  // Status labels
+  draft: 'Draft',
+  submitted: 'Submitted',
+  assigned: 'Assigned',
+  scheduled: 'Scheduled',
+  inspection_completed: 'Inspection Completed',
+  verified: 'Verified',
+  certificate_generated: 'Certificate Generated',
+  expired: 'Expired',
+
+  // Business
+  businessName: 'Business Name',
+  gstNumber: 'GST Number',
+  ownerName: 'Owner Name',
+  address: 'Address',
+  district: 'District',
+  state: 'State',
+  pincode: 'PIN Code',
+  phone: 'Phone Number',
+};
+
+export default en;

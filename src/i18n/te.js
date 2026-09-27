@@ -1,0 +1,103 @@
+const te = {
+  // Nav / Common
+  appName: 'నియమసేతు',
+  tagline: 'చట్టపరమైన కొలమానాల ధృవీకరణ వేదిక',
+  dashboard: 'డాష్‌బోర్డ్',
+  instruments: 'పరికరాలు',
+  applications: 'దరఖాస్తులు',
+  certificates: 'ధృవీకరణ పత్రాలు',
+  notifications: 'నోటిఫికేషన్లు',
+  profile: 'ప్రొఫైల్',
+  settings: 'సెట్టింగులు',
+  logout: 'లాగ్ అవుట్',
+  search: 'శోధించు',
+  loading: 'లోడ్ అవుతోంది...',
+  save: 'సేవ్ చేయి',
+  submit: 'సమర్పించు',
+  cancel: 'రద్దు చేయి',
+  edit: 'సవరించు',
+  delete: 'తొలగించు',
+  view: 'చూడు',
+  download: 'డౌన్‌లోడ్',
+  back: 'వెనుకకు',
+  next: 'తరువాత',
+  approve: 'ఆమోదించు',
+  reject: 'తిరస్కరించు',
+  saveDraft: 'డ్రాఫ్ట్ సేవ్ చేయి',
+
+  // Auth
+  login: 'లాగిన్',
+  register: 'నమోదు చేయి',
+  email: 'ఇమెయిల్ చిరునామా',
+  password: 'పాస్‌వర్డ్',
+  confirmPassword: 'పాస్‌వర్డ్ నిర్ధారించు',
+  forgotPassword: 'పాస్‌వర్డ్ మర్చిపోయారా?',
+  loginWithGoogle: 'Google తో కొనసాగించు',
+  loginWithDigiLocker: 'DigiLocker తో లాగిన్',
+  dontHaveAccount: 'ఖాతా లేదా?',
+  alreadyHaveAccount: 'ఈక్కే ఖాతా ఉందా?',
+
+  // Dashboard
+  totalApplications: 'మొత్తం దరఖాస్తులు',
+  pending: 'పెండింగ్',
+  approved: 'ఆమోదించబడింది',
+  rejected: 'తిరస్కరించబడింది',
+  activeCertificates: 'చురుకైన ధృవీకరణ పత్రాలు',
+  expiringThisMonth: 'ఈ నెల గడువు తీరుతుంది',
+  assignedToday: 'నేడు నియమితమైనవి',
+  pendingInspections: 'పెండింగ్ తనిఖీలు',
+  completed: 'పూర్తయింది',
+  certificatesIssued: 'జారీ చేసిన ధృవీకరణ పత్రాలు',
+
+  // Instruments
+  registerInstrument: 'పరికరాన్ని నమోదు చేయి',
+  instrumentType: 'పరికర రకం',
+  category: 'వర్గం',
+  manufacturer: 'తయారీదారు',
+  modelNumber: 'మోడల్ నంబర్',
+  serialNumber: 'సీరియల్ నంబర్',
+  capacity: 'సామర్థ్యం',
+  accuracy: 'ఖచ్చితత్వం / విభాగం',
+  yearOfManufacture: 'తయారీ సంవత్సరం',
+  purchaseDate: 'కొనుగోలు తేదీ',
+
+  // Application
+  newApplication: 'కొత్త దరఖాస్తు',
+  verificationApplication: 'ధృవీకరణ దరఖాస్తు',
+  verificationType: 'ధృవీకరణ రకం',
+  preferredDate: 'ఇష్టపడే తనిఖీ తేదీ',
+  applicationId: 'దరఖాస్తు ID',
+  status: 'స్థితి',
+  submittedOn: 'సమర్పించిన తేదీ',
+  remarks: 'వ్యాఖ్యలు',
+
+  // Certificate
+  digitalCertificate: 'డిజిటల్ ధృవీకరణ పత్రం',
+  certificateNumber: 'ధృవీకరణ పత్రం నంబర్',
+  verificationDate: 'ధృవీకరణ తేదీ',
+  validUntil: 'గడువు వరకు',
+  officerName: 'అధికారి పేరు',
+  downloadCertificate: 'ధృవీకరణ పత్రం డౌన్‌లోడ్',
+
+  // Status
+  draft: 'డ్రాఫ్ట్',
+  submitted: 'సమర్పించబడింది',
+  assigned: 'నియమితమైంది',
+  scheduled: 'షెడ్యూల్ చేయబడింది',
+  inspection_completed: 'తనిఖీ పూర్తైంది',
+  verified: 'ధృవీకరించబడింది',
+  certificate_generated: 'ధృవీకరణ పత్రం జారీ',
+  expired: 'గడువు తీరింది',
+
+  // Business
+  businessName: 'వ్యాపార పేరు',
+  gstNumber: 'GST నంబర్',
+  ownerName: 'యజమాని పేరు',
+  address: 'చిరునామా',
+  district: 'జిల్లా',
+  state: 'రాష్ట్రం',
+  pincode: 'పిన్ కోడ్',
+  phone: 'ఫోన్ నంబర్',
+};
+
+export default te;
