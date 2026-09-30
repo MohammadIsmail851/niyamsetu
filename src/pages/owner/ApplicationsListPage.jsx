@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { FileText, Search, Plus } from 'lucide-react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { PageHeader, DataTable, StatusBadge, EmptyState } from '@/components/shared';
-import { getDocuments } from '@/firebase/firestore';
+import { db } from '@/firebase';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { formatDate } from '@/utils';
 import { useAuthStore } from '@/store';
 
@@ -15,20 +16,19 @@ const ApplicationsListPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchApps = async () => {
-      setLoading(true);
-      try {
-        const docs = await getDocuments('applications');
-        if (isMounted) setApps(docs || []);
-      } catch {
-        if (isMounted) setApps([]);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchApps();
-    return () => { isMounted = false; };
+    const ownerId = profile?.uid;
+    if (!ownerId) { setLoading(false); return; }
+    setLoading(true);
+    const q = query(
+      collection(db, 'applications'),
+      where('ownerId', '==', ownerId),
+    );
+    const unsub = onSnapshot(
+      q,
+      snap => { setApps(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoading(false); },
+      () => { setApps([]); setLoading(false); },
+    );
+    return () => unsub();
   }, [profile?.uid]);
 
   const filtered = apps.filter(a => {

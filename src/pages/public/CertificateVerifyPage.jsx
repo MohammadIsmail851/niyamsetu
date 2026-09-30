@@ -5,7 +5,8 @@ import {
   CheckCircle, Shield, Calendar, User, Building, Package,
   AlertTriangle, ArrowLeft, Download
 } from 'lucide-react';
-import { MOCK_CERTIFICATES } from '@/data/mockData';
+import { db } from '@/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { formatDate, daysUntilExpiry, cn } from '@/utils';
 import { generateCertificatePDF } from '@/services/certificatePDF';
 import QRCode from 'qrcode';
@@ -23,22 +24,31 @@ const CertificateVerifyPage = () => {
   useEffect(() => {
     const fetchCert = async () => {
       setLoading(true);
-      await new Promise(r => setTimeout(r, 600));
-      const found = MOCK_CERTIFICATES.find(c => c.certificateNumber === certificateId);
-      if (found) {
-        setCert(found);
-        try {
-          const url = await QRCode.toDataURL(`${window.location.origin}/verify/${found.certificateNumber}`, {
-            width: 160, margin: 1, color: { dark: '#04142F', light: '#FFFFFF' }
-          });
-          setQrDataUrl(url);
-        } catch {
-          // ignore qr error
+      try {
+        // Query Firestore by certificateNumber field
+        const q = query(
+          collection(db, 'certificates'),
+          where('certificateNumber', '==', certificateId),
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const found = { id: snap.docs[0].id, ...snap.docs[0].data() };
+          setCert(found);
+          try {
+            const url = await QRCode.toDataURL(`${window.location.origin}/verify/${found.certificateNumber}`, {
+              width: 160, margin: 1, color: { dark: '#04142F', light: '#FFFFFF' }
+            });
+            setQrDataUrl(url);
+          } catch { /* ignore qr error */ }
+        } else {
+          setNotFound(true);
         }
-      } else {
+      } catch (err) {
+        console.error('[CertificateVerifyPage] fetch error:', err);
         setNotFound(true);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchCert();
   }, [certificateId]);

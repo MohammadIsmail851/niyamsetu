@@ -5,7 +5,10 @@ import { motion } from 'framer-motion';
 import { FileText, Upload, ArrowRight } from 'lucide-react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { PageHeader, FormField, Spinner } from '@/components/shared';
-import { getDocuments } from '@/firebase/firestore';
+import { db } from '@/firebase';
+import { collection, addDoc, query, where, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { useAuthStore } from '@/store';
+import { generateAppId } from '@/utils';
 import toast from 'react-hot-toast';
 
 const VERIFICATION_TYPES = [
@@ -16,40 +19,62 @@ const VERIFICATION_TYPES = [
 
 const NewApplicationPage = () => {
   const navigate = useNavigate();
+  const { profile, user } = useAuthStore();
   const [searchParams] = useSearchParams();
+  const ownerId = user?.uid || profile?.uid;
   const preselectedInstrument = searchParams.get('instrument');
   const [instruments, setInstruments] = useState([]);
   const [loadingInstruments, setLoadingInstruments] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [generatedId] = useState(`NS-APP-${new Date().getFullYear()}-${String(Math.floor(Math.random()*9000)+1000)}`);
+  const [generatedId] = useState(generateAppId);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: { instrumentId: preselectedInstrument || '' }
   });
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchInstruments = async () => {
-      setLoadingInstruments(true);
-      try {
-        const docs = await getDocuments('instruments');
-        if (isMounted) setInstruments(docs || []);
-      } catch {
-        if (isMounted) setInstruments([]);
-      } finally {
-        if (isMounted) setLoadingInstruments(false);
-      }
-    };
-    fetchInstruments();
-    return () => { isMounted = false; };
-  }, []);
+    if (!ownerId) { setLoadingInstruments(false); return; }
+    const q = query(collection(db, 'instruments'), where('ownerId', '==', ownerId));
+    const unsub = onSnapshot(
+      q,
+      snap => { setInstruments(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingInstruments(false); },
+      () => { setInstruments([]); setLoadingInstruments(false); },
+    );
+    return () => unsub();
+  }, [ownerId]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (data) => {
+    if (!ownerId) { toast.error('Session expired. Please log in again.'); return; }
     setSaving(true);
-    await new Promise(r => setTimeout(r, 900));
-    toast.success(`Application ${generatedId} submitted successfully!`);
-    navigate('/owner/applications');
-    setSaving(false);
+    try {
+      const selectedInstrument = instruments.find(i => i.id === data.instrumentId);
+      await addDoc(collection(db, 'applications'), {
+        applicationId:    generatedId,
+        ownerId,
+        ownerName:        profile?.name || '',
+        businessName:     profile?.businessName || '',
+        instrumentId:     data.instrumentId,
+        instrumentType:   selectedInstrument?.instrumentType || '',
+        serialNumber:     selectedInstrument?.serialNumber   || '',
+        manufacturer:     selectedInstrument?.manufacturer   || '',
+        capacity:         selectedInstrument?.capacity       || '',
+        district:         selectedInstrument?.district || profile?.district || '',
+        verificationType: data.verificationType,
+        preferredDate:    data.preferredDate,
+        inspectionAddress: data.inspectionAddress || '',
+        remarks:          data.remarks || '',
+        status:           'submitted',
+        submittedAt:      serverTimestamp(),
+        updatedAt:        serverTimestamp(),
+      });
+      toast.success(`Application ${generatedId} submitted successfully!`);
+      navigate('/owner/applications');
+    } catch (err) {
+      console.error('[NewApplicationPage] submit error:', err);
+      toast.error(`Submission failed: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const selectedInstrumentId = watch('instrumentId');

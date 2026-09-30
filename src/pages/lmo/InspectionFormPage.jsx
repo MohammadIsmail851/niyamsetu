@@ -1,26 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import {
   CheckCircle, XCircle, Camera, MapPin, PenLine,
-  Package, Calendar, Save, Send
+  Package, Calendar, Save, Send, Loader
 } from 'lucide-react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { PageHeader, FormField, StatusBadge, Spinner } from '@/components/shared';
-import { MOCK_APPLICATIONS, MOCK_INSTRUMENTS } from '@/data/mockData';
+import { db } from '@/firebase';
+import {
+  doc, getDoc, updateDoc, addDoc, collection, serverTimestamp
+} from 'firebase/firestore';
+import { useAuthStore } from '@/store';
 import { generateCertId } from '@/utils';
 import toast from 'react-hot-toast';
 
 const InspectionFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { profile, user } = useAuthStore();
   const [result, setResult] = useState(null); // 'pass' | 'fail'
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const app = MOCK_APPLICATIONS.find(a => a.id === id) || MOCK_APPLICATIONS[1];
-  const instrument = MOCK_INSTRUMENTS.find(i => i.id === app.instrumentId) || MOCK_INSTRUMENTS[1];
+  const [app, setApp] = useState(null);
+  const [instrument, setInstrument] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -29,26 +34,136 @@ const InspectionFormPage = () => {
     }
   });
 
+  // ── Load application + instrument ────────────────────────────────────────
+  useEffect(() => {
+    if (!id) return;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const appSnap = await getDoc(doc(db, 'applications', id));
+        if (!appSnap.exists()) { toast.error('Application not found'); setLoading(false); return; }
+        const appData = { id: appSnap.id, ...appSnap.data() };
+        setApp(appData);
+
+        if (appData.instrumentId) {
+          const instSnap = await getDoc(doc(db, 'instruments', appData.instrumentId));
+          if (instSnap.exists()) setInstrument({ id: instSnap.id, ...instSnap.data() });
+        }
+      } catch (err) {
+        console.error('[InspectionFormPage] load error:', err);
+        toast.error('Failed to load application details.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [id]);
+
+  // ── Save draft ───────────────────────────────────────────────────────────
   const onSaveDraft = async () => {
+    if (!id) return;
     setSaving(true);
-    await new Promise(r => setTimeout(r, 600));
-    toast.success('Inspection draft saved');
-    setSaving(false);
+    try {
+      await updateDoc(doc(db, 'applications', id), {
+        status: 'inspection_in_progress',
+        updatedAt: serverTimestamp(),
+      });
+      toast.success('Inspection draft saved');
+    } catch (err) {
+      toast.error('Save failed: ' + (err?.message || 'Unknown error'));
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const onSubmit = async () => {
+  // ── Submit (Approve / Reject) ────────────────────────────────────────────
+  const onSubmit = async (data) => {
     if (!result) { toast.error('Please select Pass or Fail'); return; }
+    if (!id || !app) return;
+
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1200));
-    if (result === 'pass') {
-      const certId = generateCertId();
-      toast.success(`Instrument PASSED! Digital Certificate ${certId} generated.`);
-    } else {
-      toast.error('Instrument marked as FAILED. Statutory notice dispatched.');
+    const officerId = user?.uid || profile?.uid;
+    const officerName = profile?.name || 'LMO Officer';
+
+    try {
+      if (result === 'pass') {
+        const certId = generateCertId();
+        const now = new Date();
+        // Certificate valid for 1 year
+        const validUntil = new Date(now);
+        validUntil.setFullYear(validUntil.getFullYear() + 1);
+
+        // Create certificate document
+        await addDoc(collection(db, 'certificates'), {
+          certificateNumber:  certId,
+          applicationId:      app.applicationId || id,
+          ownerId:            app.ownerId,
+          ownerName:          app.ownerName || '',
+          businessName:       app.businessName || '',
+          instrumentId:       app.instrumentId || '',
+          instrumentType:     app.instrumentType || '',
+          serialNumber:       app.serialNumber || '',
+          manufacturer:       instrument?.manufacturer || '',
+          capacity:           instrument?.capacity || '',
+          district:           app.district || '',
+          officerId,
+          officerName,
+          verificationDate:   serverTimestamp(),
+          validUntil:         validUntil.toISOString(),
+          verificationType:   app.verificationType || 'initial',
+          condition:          data.condition,
+          sealStatus:         data.sealStatus,
+          accuracyResult:     data.accuracyResult,
+          zeroError:          data.zeroError || '',
+          observations:       data.observations || '',
+          inspectionDate:     data.inspectionDate,
+          inspectionTime:     data.inspectionTime,
+          location:           data.location || app.inspectionAddress || '',
+          isValid:            true,
+          isExpiring:         false,
+          createdAt:          serverTimestamp(),
+        });
+
+        // Update application status
+        await updateDoc(doc(db, 'applications', id), {
+          status:          'certificate_generated',
+          certificateId:   certId,
+          updatedAt:       serverTimestamp(),
+        });
+
+        toast.success(`Instrument PASSED! Certificate ${certId} generated.`);
+      } else {
+        // Reject
+        await updateDoc(doc(db, 'applications', id), {
+          status:          'rejected',
+          rejectionReason: data.rejectionReason || '',
+          updatedAt:       serverTimestamp(),
+        });
+        toast.error('Instrument marked as FAILED. Rejection recorded.');
+      }
+
+      navigate('/lmo/applications');
+    } catch (err) {
+      console.error('[InspectionFormPage] submit error:', err);
+      toast.error(`Submission failed: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setSubmitting(false);
     }
-    navigate('/lmo/applications');
-    setSubmitting(false);
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center py-24">
+          <Loader size={32} className="animate-spin text-blue-600 dark:text-blue-400" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Fallback display values if app couldn't be loaded
+  const displayApp = app || { applicationId: id, instrumentType: 'Unknown', status: 'assigned', ownerName: '—', businessName: '—', serialNumber: '—', district: '—' };
+  const displayInstrument = instrument || {};
 
   return (
     <DashboardLayout>
@@ -60,9 +175,7 @@ const InspectionFormPage = () => {
 
       <div className="max-w-2xl space-y-6">
         {/* Instrument Info Glass Card */}
-        <div
-          className="p-6 transition-all duration-200 rounded-[28px] bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200 dark:border-blue-400/35 backdrop-blur-2xl shadow-xs"
-        >
+        <div className="p-6 transition-all duration-200 rounded-[28px] bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200 dark:border-blue-400/35 backdrop-blur-2xl shadow-xs">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-blue-600/10 dark:bg-blue-500/25 border border-blue-500/20 dark:border-blue-400/40 flex items-center justify-center text-blue-600 dark:text-blue-300">
@@ -70,20 +183,20 @@ const InspectionFormPage = () => {
               </div>
               <div>
                 <div className="text-xs text-blue-600 dark:text-blue-200/70 uppercase tracking-wider font-semibold">Verification Subject</div>
-                <div className="font-mono font-bold text-slate-900 dark:text-white text-lg">{app.applicationId}</div>
-                <div className="text-slate-700 dark:text-white/90 font-semibold text-sm">{app.instrumentType}</div>
+                <div className="font-mono font-bold text-slate-900 dark:text-white text-lg">{displayApp.applicationId}</div>
+                <div className="text-slate-700 dark:text-white/90 font-semibold text-sm">{displayApp.instrumentType}</div>
               </div>
             </div>
-            <StatusBadge status={app.status} />
+            <StatusBadge status={displayApp.status} />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-white/10 text-xs">
-            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Owner</span><div className="text-slate-900 dark:text-white font-medium">{app.ownerName}</div></div>
-            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Business</span><div className="text-slate-900 dark:text-white font-medium">{app.businessName}</div></div>
-            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Serial No.</span><div className="text-slate-900 dark:text-white font-medium font-mono">{app.serialNumber}</div></div>
-            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Manufacturer</span><div className="text-slate-900 dark:text-white font-medium">{instrument?.manufacturer}</div></div>
-            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Capacity</span><div className="text-slate-900 dark:text-white font-medium">{instrument?.capacity}</div></div>
-            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">District</span><div className="text-slate-900 dark:text-white font-medium">{app.district}</div></div>
+            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Owner</span><div className="text-slate-900 dark:text-white font-medium">{displayApp.ownerName}</div></div>
+            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Business</span><div className="text-slate-900 dark:text-white font-medium">{displayApp.businessName}</div></div>
+            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Serial No.</span><div className="text-slate-900 dark:text-white font-medium font-mono">{displayApp.serialNumber}</div></div>
+            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Manufacturer</span><div className="text-slate-900 dark:text-white font-medium">{displayInstrument?.manufacturer || '—'}</div></div>
+            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">Capacity</span><div className="text-slate-900 dark:text-white font-medium">{displayInstrument?.capacity || '—'}</div></div>
+            <div><span className="text-slate-500 dark:text-white/50 block mb-0.5">District</span><div className="text-slate-900 dark:text-white font-medium">{displayApp.district}</div></div>
           </div>
         </div>
 
@@ -92,7 +205,7 @@ const InspectionFormPage = () => {
           <div className="p-6 sm:p-8 rounded-[28px] bg-white/80 dark:bg-white/10 backdrop-blur-2xl border border-slate-200/80 dark:border-white/18 shadow-[0_12px_40px_rgba(0,30,100,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
             <h3 className="font-bold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
               <Calendar size={18} className="text-blue-600 dark:text-blue-400" />
-              <span>Schedule & Location</span>
+              <span>Schedule &amp; Location</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField label="Inspection Date" required>
@@ -103,7 +216,7 @@ const InspectionFormPage = () => {
               </FormField>
               <div className="md:col-span-2">
                 <FormField label="Site Address">
-                  <input {...register('location')} className="form-input" defaultValue={instrument?.address || ''} />
+                  <input {...register('location')} className="form-input" defaultValue={displayInstrument?.address || displayApp.inspectionAddress || ''} />
                 </FormField>
               </div>
               <div className="md:col-span-2">
@@ -233,7 +346,7 @@ const InspectionFormPage = () => {
               >
                 <CheckCircle size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                 <div className="text-xs text-emerald-700 dark:text-emerald-200 leading-relaxed">
-                  Upon submission, a 256-bit cryptographically verified digital certificate with embedded QR will be auto-generated.
+                  Upon submission, a 256-bit cryptographically verified digital certificate with embedded QR will be auto-generated and saved to Firestore.
                 </div>
               </motion.div>
             )}
@@ -264,12 +377,12 @@ const InspectionFormPage = () => {
               className="h-[52px] px-6 rounded-xl text-sm font-semibold text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Save size={16} />
-              <span>Save Draft</span>
+              <span>{saving ? 'Saving...' : 'Save Draft'}</span>
             </button>
             <button
               type="submit"
               disabled={submitting || !result}
-              className={`h-[52px] px-8 rounded-xl font-semibold text-white flex items-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.35)] dark:shadow-[0_0_24px_rgba(37,99,235,0.45)] hover:scale-[1.02] active:scale-[0.99] transition-all cursor-pointer ${
+              className={`h-[52px] px-8 rounded-xl font-semibold text-white flex items-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.35)] dark:shadow-[0_0_24px_rgba(37,99,235,0.45)] hover:scale-[1.02] active:scale-[0.99] disabled:opacity-50 transition-all cursor-pointer ${
                 result === 'fail'
                   ? 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 shadow-rose-600/40'
                   : 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500'

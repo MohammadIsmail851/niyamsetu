@@ -8,51 +8,49 @@ import {
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { StatCard, StatusBadge, PageHeader, EmptyState } from '@/components/shared';
 import { useAuthStore } from '@/store';
-import { getDocuments } from '@/firebase/firestore';
+import { db } from '@/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { formatDate, daysUntilExpiry } from '@/utils';
 
 const OwnerDashboard = () => {
-  const { profile } = useAuthStore();
+  const { profile, user } = useAuthStore();
+  const ownerId = user?.uid || profile?.uid;
   const [apps, setApps] = useState([]);
   const [instruments, setInstruments] = useState([]);
   const [certs, setCerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-    const loadDashboardData = async () => {
-      setLoading(true);
-      try {
-        // Fetch values only from Firestore
-        const [firestoreApps, firestoreInstruments, firestoreCerts] = await Promise.all([
-          getDocuments('applications'),
-          getDocuments('instruments'),
-          getDocuments('certificates'),
-        ]);
+    if (!ownerId) { setLoading(false); return; }
 
-        if (isMounted) {
-          setApps(firestoreApps || []);
-          setInstruments(firestoreInstruments || []);
-          setCerts(firestoreCerts || []);
-        }
-      } catch (err) {
-        // If Firestore is empty, unconfigured, or offline, show elegant empty states (no fake metrics)
-        if (isMounted) {
-          setApps([]);
-          setInstruments([]);
-          setCerts([]);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
+    setLoading(true);
+    let loaded = 0;
+    const tryDone = () => { if (++loaded >= 3) setLoading(false); };
 
-    loadDashboardData();
-    return () => { isMounted = false; };
-  }, [profile?.uid]);
+    const unsubInstruments = onSnapshot(
+      query(collection(db, 'instruments'), where('ownerId', '==', ownerId)),
+      snap => { setInstruments(snap.docs.map(d => ({ id: d.id, ...d.data() }))); tryDone(); },
+      err => { console.error('Instruments snapshot error:', err); setInstruments([]); tryDone(); },
+    );
 
+    const unsubApps = onSnapshot(
+      query(collection(db, 'applications'), where('ownerId', '==', ownerId)),
+      snap => { setApps(snap.docs.map(d => ({ id: d.id, ...d.data() }))); tryDone(); },
+      err => { console.error('Apps snapshot error:', err); setApps([]); tryDone(); },
+    );
+
+    const unsubCerts = onSnapshot(
+      query(collection(db, 'certificates'), where('ownerId', '==', ownerId)),
+      snap => { setCerts(snap.docs.map(d => ({ id: d.id, ...d.data() }))); tryDone(); },
+      err => { console.error('Certs snapshot error:', err); setCerts([]); tryDone(); },
+    );
+
+    return () => { unsubInstruments(); unsubApps(); unsubCerts(); };
+  }, [ownerId]);
+
+  const activeCertificates = certs.filter(c => c.status === 'Active' || c.status === 'active' || (!c.status && c.certificateNumber)).length;
+  const pendingDecisions = apps.filter(a => a.status === 'Pending' || a.status === 'pending' || ['submitted', 'assigned', 'scheduled'].includes(a.status)).length;
   const expiryDays = certs.length > 0 ? daysUntilExpiry(certs[0]?.validUntil) : null;
-  const pendingCount = apps.filter(a => ['submitted', 'assigned', 'scheduled'].includes(a.status)).length;
 
   return (
     <DashboardLayout>
@@ -88,13 +86,13 @@ const OwnerDashboard = () => {
         <StatCard
           icon={Award}
           label="Active Certificates"
-          value={certs.length}
+          value={activeCertificates}
           color="green"
         />
         <StatCard
           icon={Clock}
           label="Pending Decisions"
-          value={pendingCount}
+          value={pendingDecisions}
           color="amber"
         />
       </div>

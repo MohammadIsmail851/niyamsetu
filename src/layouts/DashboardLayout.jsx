@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, FileText, Award, Bell, User,
-  Settings, LogOut, ChevronLeft, ChevronRight, Globe, Menu, X, Shield,
+  Settings, LogOut, ChevronLeft, ChevronRight, Globe, Menu, X, Shield, FlaskConical, Users,
 } from 'lucide-react';
 import { useAuthStore, useAppStore } from '@/store';
 import { logout } from '@/firebase/auth';
@@ -29,16 +29,16 @@ const roleNavItems = {
   ],
   gatc: [
     { to: '/gatc/dashboard',     icon: LayoutDashboard, labelKey: 'dashboard' },
-    { to: '/gatc/tests',         icon: Package,         labelKey: 'instruments' },
-    { to: '/gatc/reports',       icon: FileText,        labelKey: 'applications' },
-    { to: '/profile',            icon: User,            labelKey: 'profile' },
+    { to: '/gatc/tests',         icon: FlaskConical,    labelKey: 'tests' },
+    { to: '/gatc/reports',       icon: FileText,        labelKey: 'labReports' },
+    { to: '/gatc/profile',       icon: User,            labelKey: 'profile' },
   ],
   admin: [
     { to: '/admin/dashboard',    icon: LayoutDashboard, labelKey: 'dashboard' },
     { to: '/admin/applications', icon: FileText,        labelKey: 'applications' },
-    { to: '/admin/officers',     icon: User,            labelKey: 'profile' },
-    { to: '/admin/analytics',    icon: Award,           labelKey: 'certificates' },
-    { to: '/settings',           icon: Settings,        labelKey: 'settings' },
+    { to: '/admin/officers',     icon: Users,           labelKey: 'officers' },
+    { to: '/admin/analytics',    icon: Award,           labelKey: 'analytics' },
+    { to: '/admin/settings',     icon: Settings,        labelKey: 'settings' },
   ],
 };
 

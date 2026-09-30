@@ -22,9 +22,14 @@ import InspectionFormPage        from '@/pages/lmo/InspectionFormPage';
 
 // GATC pages
 import GATCDashboard             from '@/pages/gatc/GATCDashboard';
+import GATCTestsPage             from '@/pages/gatc/GATCTestsPage';
+import GATCInspectionPage        from '@/pages/gatc/GATCInspectionPage';
+import GATCReportsPage           from '@/pages/gatc/GATCReportsPage';
 
 // Admin pages
 import AdminDashboard            from '@/pages/admin/AdminDashboard';
+import AdminApplicationsPage     from '@/pages/admin/AdminApplicationsPage';
+import AdminUsersPage            from '@/pages/admin/AdminUsersPage';
 
 // Shared
 import SearchPage                from '@/pages/SearchPage';
@@ -79,16 +84,18 @@ function App() {
 
         {/* ── GATC ─────────────────────────────────────────────── */}
         <Route path="/gatc/dashboard"              element={<ProtectedRoute allowedRoles={['gatc']}><GATCDashboard /></ProtectedRoute>} />
-        <Route path="/gatc/tests"                  element={<ProtectedRoute allowedRoles={['gatc']}><GATCDashboard /></ProtectedRoute>} />
-        <Route path="/gatc/reports"                element={<ProtectedRoute allowedRoles={['gatc']}><GATCDashboard /></ProtectedRoute>} />
-        <Route path="/gatc/profile"                element={<ProtectedRoute allowedRoles={['gatc']}><GATCDashboard /></ProtectedRoute>} />
+        <Route path="/gatc/tests"                  element={<ProtectedRoute allowedRoles={['gatc']}><GATCTestsPage /></ProtectedRoute>} />
+        <Route path="/gatc/tests/:id"              element={<ProtectedRoute allowedRoles={['gatc']}><GATCInspectionPage /></ProtectedRoute>} />
+        <Route path="/gatc/reports"                element={<ProtectedRoute allowedRoles={['gatc']}><GATCReportsPage /></ProtectedRoute>} />
+        <Route path="/gatc/profile"                element={<ProtectedRoute allowedRoles={['gatc']}><ProfilePage /></ProtectedRoute>} />
 
         {/* ── Admin ────────────────────────────────────────────── */}
         <Route path="/admin/dashboard"             element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/applications"          element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/officers"              element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/applications"          element={<ProtectedRoute allowedRoles={['admin']}><AdminApplicationsPage /></ProtectedRoute>} />
+        <Route path="/admin/officers"              element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersPage /></ProtectedRoute>} />
+        <Route path="/admin/users"                 element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersPage /></ProtectedRoute>} />
         <Route path="/admin/analytics"             element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/settings"              element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/settings"              element={<ProtectedRoute allowedRoles={['admin']}><SettingsPage /></ProtectedRoute>} />
         <Route path="/admin/search"                element={<ProtectedRoute allowedRoles={['admin']}><SearchPage /></ProtectedRoute>} />
 
         {/* ── Shared Authenticated ──────────────────────────────── */}

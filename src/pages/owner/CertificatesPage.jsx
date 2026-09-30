@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Award, Download, QrCode, CheckCircle, Calendar, User } from 'lucide-react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { PageHeader, EmptyState } from '@/components/shared';
-import { getDocuments } from '@/firebase/firestore';
+import { db } from '@/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { formatDate, daysUntilExpiry } from '@/utils';
 import { generateCertificatePDF } from '@/services/certificatePDF';
 import toast from 'react-hot-toast';
@@ -16,20 +17,19 @@ const CertificatesPage = () => {
   const [downloading, setDownloading] = useState(null);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchCerts = async () => {
-      setLoading(true);
-      try {
-        const docs = await getDocuments('certificates');
-        if (isMounted) setCerts(docs || []);
-      } catch {
-        if (isMounted) setCerts([]);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchCerts();
-    return () => { isMounted = false; };
+    const ownerId = profile?.uid;
+    if (!ownerId) { setLoading(false); return; }
+    setLoading(true);
+    const q = query(
+      collection(db, 'certificates'),
+      where('ownerId', '==', ownerId),
+    );
+    const unsub = onSnapshot(
+      q,
+      snap => { setCerts(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoading(false); },
+      () => { setCerts([]); setLoading(false); },
+    );
+    return () => unsub();
   }, [profile?.uid]);
 
   const handleDownload = async (cert) => {

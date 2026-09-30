@@ -4,42 +4,67 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, FileText, Award, Package } from 'lucide-react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { PageHeader, StatusBadge } from '@/components/shared';
-import { getDocuments } from '@/firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '@/firebase';
 import { formatDate } from '@/utils';
+import { useAuthStore } from '@/store';
 
 const SearchPage = () => {
+  const { user, profile } = useAuthStore();
+  const ownerId = user?.uid || profile?.uid;
+  const isOwner = profile?.role === 'business_owner' || (!profile?.role && ownerId);
+
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searched, setSearched] = useState(false);
   const [allData, setAllData] = useState({ applications: [], certificates: [], instruments: [] });
   const [loadingData, setLoadingData] = useState(true);
 
-  // Pre-load all data once on mount for instant search
+  // Real-time synchronization with role-aware queries
   useEffect(() => {
-    let isMounted = true;
-    const fetchAll = async () => {
-      try {
-        const [apps, certs, insts] = await Promise.all([
-          getDocuments('applications'),
-          getDocuments('certificates'),
-          getDocuments('instruments'),
-        ]);
-        if (isMounted) {
-          setAllData({
-            applications: apps || [],
-            certificates: certs || [],
-            instruments: insts || [],
-          });
-        }
-      } catch {
-        // Silently fail — search will return empty
-      } finally {
-        if (isMounted) setLoadingData(false);
-      }
+    let unsubs = [];
+    try {
+      const appsRef = collection(db, 'applications');
+      const certsRef = collection(db, 'certificates');
+      const instsRef = collection(db, 'instruments');
+
+      const appsQuery = isOwner && ownerId ? query(appsRef, where('ownerId', '==', ownerId)) : appsRef;
+      const certsQuery = isOwner && ownerId ? query(certsRef, where('ownerId', '==', ownerId)) : certsRef;
+      const instsQuery = isOwner && ownerId ? query(instsRef, where('ownerId', '==', ownerId)) : instsRef;
+
+      const unsubApps = onSnapshot(appsQuery, (snap) => {
+        const apps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setAllData(prev => ({ ...prev, applications: apps }));
+        setLoadingData(false);
+      }, (err) => {
+        console.error('SearchPage apps listener error:', err);
+        setLoadingData(false);
+      });
+
+      const unsubCerts = onSnapshot(certsQuery, (snap) => {
+        const certs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setAllData(prev => ({ ...prev, certificates: certs }));
+      }, (err) => {
+        console.error('SearchPage certs listener error:', err);
+      });
+
+      const unsubInsts = onSnapshot(instsQuery, (snap) => {
+        const insts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setAllData(prev => ({ ...prev, instruments: insts }));
+      }, (err) => {
+        console.error('SearchPage insts listener error:', err);
+      });
+
+      unsubs = [unsubApps, unsubCerts, unsubInsts];
+    } catch (e) {
+      console.error('SearchPage setup error:', e);
+      setLoadingData(false);
+    }
+
+    return () => {
+      unsubs.forEach(u => typeof u === 'function' && u());
     };
-    fetchAll();
-    return () => { isMounted = false; };
-  }, []);
+  }, [isOwner, ownerId]);
 
   const searchAll = (q) => {
     const lq = q.toLowerCase();
@@ -60,7 +85,8 @@ const SearchPage = () => {
         (c.certificateNumber || '').toLowerCase().includes(lq) ||
         (c.serialNumber || '').toLowerCase().includes(lq) ||
         (c.ownerName || '').toLowerCase().includes(lq) ||
-        (c.businessName || '').toLowerCase().includes(lq)
+        (c.businessName || '').toLowerCase().includes(lq) ||
+        (c.instrumentType || '').toLowerCase().includes(lq)
       ) hits.push({ type: 'certificate', item: c });
     });
 
@@ -68,7 +94,9 @@ const SearchPage = () => {
       if (
         (i.serialNumber || '').toLowerCase().includes(lq) ||
         (i.manufacturer || '').toLowerCase().includes(lq) ||
+        (i.model || '').toLowerCase().includes(lq) ||
         (i.modelNumber || '').toLowerCase().includes(lq) ||
+        (i.instrumentType || '').toLowerCase().includes(lq) ||
         (i.businessName || '').toLowerCase().includes(lq)
       ) hits.push({ type: 'instrument', item: i });
     });

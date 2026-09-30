@@ -7,6 +7,8 @@ import {
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { PageHeader } from '@/components/shared';
 import { useAuthStore } from '@/store';
+import { db } from '@/firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
@@ -31,15 +33,23 @@ const ProfilePage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    const uid = profile?.uid;
+    if (!uid) { toast.error('Session expired. Please log in.'); return; }
     setSaving(true);
-    await new Promise(r => setTimeout(r, 600));
-    setProfile({
-      ...profile,
-      ...formData,
-    });
-    setSaving(false);
-    setIsEditing(false);
-    toast.success('Profile details updated successfully!');
+    try {
+      await updateDoc(doc(db, 'users', uid), {
+        ...formData,
+        updatedAt: serverTimestamp(),
+      });
+      setProfile({ ...profile, ...formData });
+      setIsEditing(false);
+      toast.success('Profile details updated successfully!');
+    } catch (err) {
+      console.error('[ProfilePage] save error:', err);
+      toast.error(`Save failed: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const roleLabels = {

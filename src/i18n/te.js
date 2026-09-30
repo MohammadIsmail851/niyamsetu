@@ -12,6 +12,12 @@ const te = {
   logout: 'లాగ్ అవుట్',
   search: 'శోధించు',
   loading: 'లోడ్ అవుతోంది...',
+  // Role-specific nav
+  tests: 'ల్యాబ్ పరీక్షలు',
+  labReports: 'ల్యాబ్ నివేదికలు',
+  users: 'వినియోగదారులు',
+  analytics: 'విశ్లేషణలు',
+  officers: 'అధికారులు & ల్యాబ్లు',
   save: 'సేవ్ చేయి',
   submit: 'సమర్పించు',
   cancel: 'రద్దు చేయి',

@@ -12,6 +12,12 @@ const en = {
   logout: 'Logout',
   search: 'Search',
   loading: 'Loading...',
+  // Role-specific nav
+  tests: 'Lab Tests',
+  labReports: 'Lab Reports',
+  users: 'Users',
+  analytics: 'Analytics',
+  officers: 'Officers & Labs',
   save: 'Save',
   submit: 'Submit',
   cancel: 'Cancel',

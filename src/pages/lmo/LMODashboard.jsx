@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { StatCard, StatusBadge, PageHeader, EmptyState } from '@/components/shared';
-import { getDocuments } from '@/firebase/firestore';
+import { db } from '@/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { useAuthStore } from '@/store';
 import { formatDate } from '@/utils';
 
@@ -16,20 +17,13 @@ const LMODashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchLmoData = async () => {
-      setLoading(true);
-      try {
-        const firestoreApps = await getDocuments('applications');
-        if (isMounted) setApps(firestoreApps || []);
-      } catch {
-        if (isMounted) setApps([]);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchLmoData();
-    return () => { isMounted = false; };
+    setLoading(true);
+    const unsub = onSnapshot(
+      collection(db, 'applications'),
+      snap => { setApps(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoading(false); },
+      () => { setApps([]); setLoading(false); },
+    );
+    return () => unsub();
   }, []);
 
   const assigned = apps.filter(a => a.status !== 'certificate_generated');
